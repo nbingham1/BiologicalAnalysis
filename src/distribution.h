@@ -19,6 +19,9 @@ enum dtype
 
 struct distribution
 {
+	distribution();
+	~distribution();
+
 	double *m_table;
 	double *s_table;
 	double *p_table;
@@ -38,7 +41,7 @@ struct distribution
 	bool   grid;
 	bool   graph;
 
-	dtype distribution;
+	dtype distribution_type;
 
 	lddocument *active_document;
 
@@ -47,7 +50,7 @@ struct distribution
 
 	// p values
 	double *luria_p(double m, int n_sets);
-	double *poisson_p(int n_sets);
+	double *poisson_p(double mu, int n_sets);
 	double *normal_p(int n_sets);
 
 	// luria distribution

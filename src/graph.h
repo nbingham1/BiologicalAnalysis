@@ -25,48 +25,80 @@ enum dimension_t
 
 struct data
 {
+	data();
+	~data();
 	char title[32];
 
 	double *verts;
 	double *norms;
 	unsigned int *indices;
 
+	double *basedataptr;
+	int ptrindex;
+
 	int x_size;
-	int y_size;
+	int z_size;
 
 	double xstart;
 	double xend;
 	double xstep;
 	double ystart;
 	double yend;
-	double ystep;
 	double zstart;
 	double zend;
+	double zstep;
+
+	vec ymin;
+	vec ymax;
 
 	vec rendcol;
 
 	bool *show;
 	bool interactive;
-	bool selected;
-	int sindex;
-	int sindex2;
+	bool remakeb;
+	bool integer;
+	bool snaptomin;
+	bool snaptomax;
 
 	graph_t gtype;
 	dimension_t dtype;
 
-	void init(char *name, graph_t type, double *heights, double xs, double xe, double xi, double ys, double ye, double yi);
+	void init(char *name, graph_t type, double *heights, double xs, double xe, double xi, double zs, double ze, double zi);
+	void remake(double *heights);
 	void release();
 
-	double getvalue(double x, double y);
+	double getvalue(double x, double z);
 
 	void render();
+};
 
-	void combine(data *d1, data *d2);
+struct tracer
+{
+	tracer();
+	~tracer();
+
+	vec position;
+	vec bscale;
+
+	double *xcon,
+		   *ycon,
+		   *zcon;
+
+	bool xsel, zsel;
+	bool *show;
+
+	data *dataptr;
+
+	void init(data *d, double *x, double *y, double *z, bool *s);
+	void render();
 };
 
 struct graph
 {
+	graph();
+	~graph();
 	llist<data*> datalist;
+	llist<tracer*> tracerlist;
 	float x_size;
 	float y_size;
 	float z_size;
@@ -90,16 +122,27 @@ struct graph
 	bool grid;
 	bool selected;
 
-	void init(char *name, float sx, float sy, float sz);
+	GLdouble modelview[16];
+	GLdouble projection[16];
+	GLint viewport[4];
+
+	displayhdl *disp;
+
+	void init(const char *name, displayhdl *display, float sx, float sy, float sz);
 	void release();
 
 	void adddata(data *dataptr);
 	void remdata(data *dataptr);
 
-	void render(displayhdl *disp);
+	void addtracer(tracer *tracerptr);
+	void remtracer(tracer *tracerptr);
+
+	void render();
+
+	void rotate(float x, float y);
 
 	void handleclick(float x, float y);
-	void rotate(float x, float y);
+	void handlerelease(float x, float y);
 	void handledrag(float x, float y);
 };
 

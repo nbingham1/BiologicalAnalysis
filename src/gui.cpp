@@ -22,6 +22,7 @@ checkbox &checkbox::operator=(checkbox box)
 	position = box.position;
 	color = box.color;
 	status = false;
+	return *this;
 }
 
 void checkbox::init(char name[32], vec pos, vec col)

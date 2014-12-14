@@ -14,6 +14,18 @@ int fsize(FILE *file);
 template <class A>
 struct lnode
 {
+	lnode()
+	{
+		next = NULL;
+		prev = NULL;
+	}
+
+	~lnode()
+	{
+		next = NULL;
+		prev = NULL;
+	}
+
 	A data;
 
 	lnode<A> *next;
@@ -23,6 +35,15 @@ struct lnode
 template <class A>
 struct llist
 {
+	llist()
+	{
+		init();
+	}
+	~llist()
+	{
+		clear();
+	}
+
 	lnode<A> *first;
 	lnode<A> *last;
 	int num_nodes;

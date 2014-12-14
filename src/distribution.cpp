@@ -1,5 +1,36 @@
 #include "distribution.h"
 
+distribution::distribution()
+{
+	m_table = NULL;
+	s_table = NULL;
+	p_table = NULL;
+	ps_table = NULL;
+	pf_table = NULL;
+	h_table = NULL;
+	points = NULL;
+	max = 0.0;
+	left = 0.0;
+	right = 0.0;
+	max_sigma = 0.0;
+	num_sets = 0;
+	num_points = 0;
+	num_sigma = 0;
+
+	error_bars = false;
+	grid = false;
+	graph = false;
+
+	distribution_type = luria_d;
+
+	active_document = NULL;
+}
+
+distribution::~distribution()
+{
+	clear();
+}
+
 void distribution::init()
 {
 	m_table = NULL;
@@ -95,7 +126,7 @@ double *distribution::luria_p(double m, int n_sets)
 	return p_table;
 }
 
-double *distribution::poisson_p(int n_sets)
+double *distribution::poisson_p(double mu, int n_sets)
 {
 	if (active_document == NULL)
 	{
@@ -103,7 +134,7 @@ double *distribution::poisson_p(int n_sets)
 		return NULL;
 	}
 
-	double mu;
+	//double mu;
 
 	p_table = new double[n_sets];
 	if (p_table == NULL)
@@ -113,7 +144,7 @@ double *distribution::poisson_p(int n_sets)
 	}
 
 
-	mu = double(active_document->num_count)/double(n_sets);
+	//mu = double(active_document->num_count)/double(n_sets);
 	for (int x = 0; x < n_sets; x++)
 		p_table[x] = exp(-mu)*pow(mu, x)/m_fac(x);
 
@@ -143,11 +174,9 @@ double *distribution::normal_p(int n_sets)
 	mu = double(active_document->num_count)/double(n_sets);
 
 	sig = 0.0;
-	lnode<int> *pos = active_document->container.first;
 	for (int x = 0; x < n_sets; x++)
 	{
-		curr = pos->data;
-		pos = pos->next;
+		curr = active_document->counts[x];
 		sig += m_sqr(mu-curr);
 	}
 	sig /= n_sets-1;
@@ -265,7 +294,6 @@ void distribution::computepoints_luria()
 	double sum;
 	int zero, maxi;
 	double maxd, delta;
-	int contval;
 
 	maxd = -10000;
 	maxi = 0;
@@ -275,15 +303,10 @@ void distribution::computepoints_luria()
 		sum = 0.0;
 		zero = 0;
 
-		lnode<int> *pos = active_document->container.first;
 		for (int y = 0; y < num_sets; y++)
 		{
-			if (p_table[y*num_points + x] != 0)
-			{
-				contval = pos->data;
-				pos = pos->next;
-				sum += log(p_table[y*num_points + x])*double(contval);
-			}
+			if (p_table[y*num_points + x] != 0.0)
+				sum += log(p_table[y*num_points + x])*active_document->counts[y];
 			else
 				zero = 1;
 		}
@@ -300,7 +323,6 @@ void distribution::computepoints_luria()
 			maxi = x;
 		}
 	}
-
 	if (maxd == -10000)
 		return;
 
@@ -427,7 +449,6 @@ void distribution::computepoints_normal()
 	double sum;
 	int zero;
 	double maxd;
-	int contval;
 
 	maxd = -10000;
 
@@ -438,15 +459,10 @@ void distribution::computepoints_normal()
 			sum = 0.0;
 			zero = 0;
 
-			lnode<int> *pos = active_document->container.first;
 			for (int z = 0; z < num_sets; z++)
 			{
 				if (p_table[z*num_sigma*num_points + x*num_points + y] != 0)
-				{
-					contval = pos->data;
-					pos = pos->next;
-					sum += log(p_table[z*num_sigma*num_points + x*num_points + y])*contval;
-				}
+					sum += log(p_table[z*num_sigma*num_points + x*num_points + y])*active_document->counts[z];
 				else
 					zero = 1;
 			}
@@ -507,10 +523,7 @@ void distribution::pval_poisson()
 {
 	for (int x = 0; x < num_sets; x++)
 		for (int y = 0; y < num_points; y++)
-		{
-			p_table[x*num_points + y] = exp(-m_table[y])*pow(m_table[y], x)/m_fac(x);
-			printf("%f\n", p_table[x*num_points + y]);
-		}
+			p_table[x*num_points + y] = exp(-m_table[y])*pow(m_table[y], x)/double(m_fac(x));
 }
 
 double *distribution::distribution_poisson(double mstart, double mend, double mstep, int n_sets)
@@ -718,7 +731,6 @@ void distribution::computepoints_luria3()
 	double sum;
 	int zero;
 	double maxd;
-	int contval;
 
 	maxd = -10000.0;
 
@@ -728,15 +740,10 @@ void distribution::computepoints_luria3()
 			sum = 0.0;
 			zero = 0;
 
-			lnode<int> *pos = active_document->container.first;
 			for (int z = 0; z < num_sets; z++)
 			{
 				if (pf_table[z*num_sigma*num_points + x*num_points + y] != 0)
-				{
-					contval = pos->data;
-					pos = pos->next;
-					sum += log(pf_table[z*num_sigma*num_points + x*num_points + y])*contval;
-				}
+					sum += log(pf_table[z*num_sigma*num_points + x*num_points + y])*active_document->counts[z];
 				else
 					zero = 1;
 			}

@@ -25,11 +25,11 @@ void init()
 	glEnable(GL_DEPTH_TEST);
    	glShadeModel(GL_SMOOTH);
 
-   	GLfloat mat_shininess[] = { 100.0 };
-   	GLfloat light_position[] = { 1.0, 0.0, 1.0, 0.0 };
+   	GLfloat mat_shininess[] = { 10000.0 };
+   	GLfloat light_position[] = { 0.0, 1.0, 0.0, 0.0 };
    	glShadeModel (GL_SMOOTH);
 
-   	glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+   	glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, mat_shininess);
    	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
   	glEnable(GL_LIGHT0);
@@ -67,9 +67,6 @@ void mousefunc(int button, int state, int x, int y)
 	pos = (float)x/9.0;
 	off = (float)y/15.0;
 
-	float upx = 2.2*float(x)/(float)renderer.display.scrn_height - 1.1*(float)renderer.display.scrn_width/(float)renderer.display.scrn_height;
-	float upy = 2.2*float(y)/renderer.display.scrn_height - 1.1;
-
 	renderer.mouse_x = pos;
 	renderer.mouse_y = off;
 	renderer.mouse_b = button;
@@ -84,13 +81,13 @@ void mousefunc(int button, int state, int x, int y)
 			curr = curr->next;
 		}
 
-		renderer.fitgraph.handleclick(upx, upy);
-		renderer.errorgraph.handleclick(upx, upy);
+		renderer.fitgraph.handleclick(float(x), float(renderer.display.scrn_height - y));
+		renderer.errorgraph.handleclick(float(x), float(renderer.display.scrn_height - y));
 	}
 	else if (state == GLUT_UP)
 	{
-		renderer.fitgraph.selected = false;
-		renderer.errorgraph.selected = false;
+		renderer.fitgraph.handlerelease(float(x), float(renderer.display.scrn_height - y));
+		renderer.errorgraph.handlerelease(float(x), float(renderer.display.scrn_height - y));
 	}
 }
 
@@ -100,16 +97,13 @@ void motionfunc(int x, int y)
 	pos = (float)x/9.0;
 	off = (float)y/15.0;
 
-	float upx = 2.2*float(x)/(float)renderer.display.scrn_height - 1.1*(float)renderer.display.scrn_width/(float)renderer.display.scrn_height;
-	float upy = 2.2*float(y)/renderer.display.scrn_height - 1.1;
-
 	renderer.mouse_x = pos;
 	renderer.mouse_y = off;
 
 	if (renderer.mouse_b == GLUT_LEFT_BUTTON)
 	{
-		renderer.fitgraph.handledrag(upx, upy);
-		renderer.errorgraph.handledrag(upx, upy);
+		renderer.fitgraph.handledrag(float(x), float(renderer.display.scrn_height - y));
+		renderer.errorgraph.handledrag(float(x), float(renderer.display.scrn_height - y));
 	}
 }
 
