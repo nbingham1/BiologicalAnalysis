@@ -19,13 +19,13 @@ void lddocument::init()
 	max_height = 0;
 
 	// flags
-	/*distribution = LURIA;
+	distribution = LURIA;
 	error_bars = 0;
 	current_prob = 1;
-	update_status = 1;*/
+	update_status = 1;
 	mmu = 0.0;
 	mml = 0.0;
-	/*luria = 1;
+	luria = 1;
 	normal = 0;
 	poisson = 0;
 	binomial = 0;
@@ -33,15 +33,15 @@ void lddocument::init()
 	draw_select = 0;
 	update_select = 0;
 	draw_poisson = 0;
-	draw_normal = 0;*/
+	draw_normal = 0;
 	mselect = 0.0f;
 	mselect_max = 0.0f;
 	mselect_left = 0.0f;
 	mselect_right = 0.0f;
-	/*linear = 1;
+	linear = 1;
 	left = 0;
 	right = 0;
-	current = 0;*/
+	current = 0;
 
 	container.init();
 	reset_container.init();
@@ -71,12 +71,6 @@ void lddocument::open_document(char *fname)
 	fread(contents, 1, fsize(lpfile), lpfile);
 	contents[fsize(lpfile)] = '\0';
 	fseek(lpfile, 0, SEEK_SET);
-
-	char c;
-	while ((c = getc(lpfile)) == '#')
-		while (((c = getc(lpfile)) != '\n') && (c != EOF))
-
-	fseek(lpfile, -1, SEEK_CUR);
 
 	setcount = 0;
 	max = 0;

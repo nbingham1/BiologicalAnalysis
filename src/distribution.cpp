@@ -65,7 +65,7 @@ void distribution::clear()
 
 
 // p values
-bool distribution::luria_p(double m, int n_sets, double *tblptr)
+double *distribution::luria_p(double m, int n_sets)
 {
 	double sum, max;
 
@@ -73,8 +73,7 @@ bool distribution::luria_p(double m, int n_sets, double *tblptr)
 	if (p_table == NULL)
 	{
 		perror("luria_p(): alloc of p_table failed.");
-		tblptr = NULL;
-		return false;
+		return NULL;
 	}
 
 	p_table[0] = exp(-m);
@@ -93,17 +92,15 @@ bool distribution::luria_p(double m, int n_sets, double *tblptr)
 			max = p_table[x];
 	}
 
-	tblptr = p_table;
-	return true;
+	return p_table;
 }
 
-bool distribution::poisson_p(int n_sets, double *tblptr)
+double *distribution::poisson_p(int n_sets)
 {
 	if (active_document == NULL)
 	{
 		perror("normal_p(): active document is null.");
-		tblptr = NULL;
-		return false;
+		return NULL;
 	}
 
 	double mu;
@@ -112,8 +109,7 @@ bool distribution::poisson_p(int n_sets, double *tblptr)
 	if (p_table == NULL)
 	{
 		perror("poisson_p(): alloc of p_table failed.");
-		tblptr = NULL;
-		return false;
+		return NULL;
 	}
 
 
@@ -122,17 +118,15 @@ bool distribution::poisson_p(int n_sets, double *tblptr)
 		p_table[x] = exp(-mu)*pow(mu, x)/m_fac(x);
 
 
-	tblptr = p_table;
-	return true;
+	return p_table;
 }
 
-bool distribution::normal_p(int n_sets, double *tblptr)
+double *distribution::normal_p(int n_sets)
 {
 	if (active_document == NULL)
 	{
 		perror("normal_p(): active document is null.");
-		tblptr = NULL;
-		return false;
+		return NULL;
 	}
 
 	int curr;
@@ -142,8 +136,7 @@ bool distribution::normal_p(int n_sets, double *tblptr)
 	if (p_table == NULL)
 	{
 		perror("normal_p(): alloc of p_table failed.");
-		tblptr = NULL;
-		return false;
+		return NULL;
 	}
 
 
@@ -153,16 +146,16 @@ bool distribution::normal_p(int n_sets, double *tblptr)
 	lnode<int> *pos = active_document->container.first;
 	for (int x = 0; x < n_sets; x++)
 	{
-		active_document->container.getpos(pos, &curr);
+		curr = pos->data;
+		pos = pos->next;
 		sig += m_sqr(mu-curr);
 	}
 	sig /= n_sets-1;
 
 	for (int x= 0; x < n_sets; x++)
-		p_table[x] = exp(-m_sqr(double(x)-mu)/(2.0*sig))/(sqrt(2.0*sig)*m_pi);
+		p_table[x] = exp(-m_sqr(double(double(x)-mu))/(2.0*sig))/(sqrt(2.0*sig)*m_pi);
 
-	tblptr = p_table;
-	return true;
+	return p_table;
 }
 
 // luria distribution
@@ -197,7 +190,9 @@ bool distribution::alloc_luria(int size, double mstart, double mstep)
 	}
 
 	for (int x = 0; x < size; x++)
-		m_table[x] = mstart + x*mstep;
+	{
+		m_table[x] = mstart + double(x)*mstep;
+	}
 
 	return true;
 }
@@ -237,7 +232,7 @@ void distribution::pval_luria(int r)
 	}
 }
 
-bool distribution::distribution_luria(double mstart, double mend, double mstep, int n_sets, double *tblptr)
+double *distribution::distribution_luria(double mstart, double mend, double mstep, int n_sets)
 {
 	int size;
 
@@ -247,8 +242,7 @@ bool distribution::distribution_luria(double mstart, double mend, double mstep, 
 
 	if (!alloc_luria(num_points, mstart, mstep))
 	{
-		tblptr = NULL;
-		return false;
+		return NULL;
 	}
 
 	for (int x = 0; x < num_sets; x++)
@@ -257,8 +251,7 @@ bool distribution::distribution_luria(double mstart, double mend, double mstep, 
 	computepoints_luria();
 	release_luria();
 
-	tblptr = points;
-	return true;
+	return points;
 }
 
 void distribution::computepoints_luria()
@@ -287,7 +280,8 @@ void distribution::computepoints_luria()
 		{
 			if (p_table[y*num_points + x] != 0)
 			{
-				active_document->container.getpos(pos, &contval);
+				contval = pos->data;
+				pos = pos->next;
 				sum += log(p_table[y*num_points + x])*double(contval);
 			}
 			else
@@ -400,12 +394,11 @@ void distribution::pval_normal()
 				p_table[x*num_sigma*num_points + y*num_points + z] = exp(-m_sqr(m_table[z]-x)/(2*m_sqr(s_table[y])))/(sqrt(2)*m_pi*s_table[y]);
 }
 
-bool distribution::distribution_normal(double mstart, double mend, double mstep, double sstart, double send, double sstep, int n_sets, double *tblptr)
+double *distribution::distribution_normal(double mstart, double mend, double mstep, double sstart, double send, double sstep, int n_sets)
 {
 	if (sstart < 0 || mstep == 0 || sstep == 0)
 	{
-		tblptr = NULL;
-		return false;
+		return NULL;
 	}
 
 	num_points = (int)ceil((mend - mstart)/mstep);
@@ -415,15 +408,12 @@ bool distribution::distribution_normal(double mstart, double mend, double mstep,
 
 	if (!alloc_normal(num_points, mstart, mstep, num_sigma, sstart, sstep))
 	{
-		tblptr = NULL;
-		return false;
+		return NULL;
 	}
 
 	pval_normal();
 	computepoints_normal();
-	release_normal();
-	tblptr = points;
-	return true;
+	return points;
 }
 
 void distribution::computepoints_normal()
@@ -453,7 +443,8 @@ void distribution::computepoints_normal()
 			{
 				if (p_table[z*num_sigma*num_points + x*num_points + y] != 0)
 				{
-					active_document->container.getpos(pos, &contval);
+					contval = pos->data;
+					pos = pos->next;
 					sum += log(p_table[z*num_sigma*num_points + x*num_points + y])*contval;
 				}
 				else
@@ -492,7 +483,7 @@ void distribution::computepoints_normal()
 	}
 }
 
-bool distribution::distribution_normal2(double mstart, double mend, double mstep, double sigma, int n_sets, double *tblptr)
+double *distribution::distribution_normal2(double mstart, double mend, double mstep, double sigma, int n_sets)
 {
 	num_points = (int)ceil((mend - mstart)/mstep);
 	num_sigma = 1;
@@ -501,16 +492,14 @@ bool distribution::distribution_normal2(double mstart, double mend, double mstep
 
 	if (!alloc_normal(num_points, mstart, mstep, num_sigma, 1.0, 1.0))
 	{
-		tblptr = NULL;
-		return false;
+		return NULL;
 	}
 
 	pval_normal();
 	computepoints_normal();
 	release_normal();
 
-	tblptr = points;
-	return true;
+	return points;
 }
 
 // 2D poisson distribution
@@ -518,10 +507,13 @@ void distribution::pval_poisson()
 {
 	for (int x = 0; x < num_sets; x++)
 		for (int y = 0; y < num_points; y++)
+		{
 			p_table[x*num_points + y] = exp(-m_table[y])*pow(m_table[y], x)/m_fac(x);
+			printf("%f\n", p_table[x*num_points + y]);
+		}
 }
 
-bool distribution::distribution_poisson(double mstart, double mend, double mstep, int n_sets, double *tblptr)
+double *distribution::distribution_poisson(double mstart, double mend, double mstep, int n_sets)
 {
 	int size;
 
@@ -531,16 +523,14 @@ bool distribution::distribution_poisson(double mstart, double mend, double mstep
 
 	if (!alloc_luria(num_points, mstart, mstep))
 	{
-		tblptr = NULL;
-		return false;
+		return NULL;
 	}
 
 	pval_poisson();
 	computepoints_luria();
 	release_luria();
 
-	tblptr = points;
-	return true;
+	return points;
 }
 
 // 2D binomial distribution
@@ -551,7 +541,7 @@ void distribution::pval_binomial(double prob, int total)
 			p_table[x*num_points + y] = 1.0;
 }
 
-bool distribution::distribution_binomial(double mstart, double mend, double mstep, double prob, int n_sets, double *tblptr)
+double *distribution::distribution_binomial(double mstart, double mend, double mstep, double prob, int n_sets)
 {
 	int size;
 
@@ -561,16 +551,14 @@ bool distribution::distribution_binomial(double mstart, double mend, double mste
 
 	if (!alloc_luria(num_points, mstart, mstep))
 	{
-		tblptr = NULL;
-		return false;
+		return NULL;
 	}
 
 	pval_binomial(prob, n_sets);
 	computepoints_luria();
 	release_luria();
 
-	tblptr = points;
-	return true;
+	return points;
 }
 
 // 3D luria distribution
@@ -695,12 +683,11 @@ void distribution::pval_luria3()
 			}
 }
 
-bool distribution::distribution_luria3(double mstart, double mend, double mstep, double sstart, double send, double sstep, int n_sets, double *tblptr)
+double *distribution::distribution_luria3(double mstart, double mend, double mstep, double sstart, double send, double sstep, int n_sets)
 {
 	if (sstart < 0 || mstep == 0 || sstep == 0)
 	{
-		tblptr = NULL;
-		return false;
+		return NULL;
 	}
 
 	num_points = (int)ceil((mend - mstart)/mstep);
@@ -710,16 +697,14 @@ bool distribution::distribution_luria3(double mstart, double mend, double mstep,
 
 	if (!alloc_luria3(num_points, mstart, mstep, num_sigma, sstart, sstep))
 	{
-		tblptr = NULL;
-		return false;
+		return NULL;
 	}
 
 	pval_luria3();
 	computepoints_luria3();
 	release_luria3();
 
-	tblptr = points;
-	return true;
+	return points;
 }
 
 void distribution::computepoints_luria3()
@@ -748,7 +733,8 @@ void distribution::computepoints_luria3()
 			{
 				if (pf_table[z*num_sigma*num_points + x*num_points + y] != 0)
 				{
-					active_document->container.getpos(pos, &contval);
+					contval = pos->data;
+					pos = pos->next;
 					sum += log(pf_table[z*num_sigma*num_points + x*num_points + y])*contval;
 				}
 				else

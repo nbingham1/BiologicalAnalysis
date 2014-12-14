@@ -2,7 +2,7 @@
 
 #include "distribution.h"
 #include "document.h"
-#include "section.h"
+#include "graph.h"
 
 #ifndef renderer_h
 #define renderer_h
@@ -11,12 +11,14 @@ struct renderhdl
 {
 	displayhdl display;
 
-	llist<object*> objectlist;
-	object *sobject;
-	llist<section> sectionlist;
-	section *ssection;
-	llist<node> nodelist;
-	node *snode;
+	lddocument document;
+
+	graph fitgraph;
+	graph errorgraph;
+
+	bool luriapoisson;
+
+	llist<checkbox> boxlist;
 
 	float mouse_x;
 	float mouse_y;
@@ -26,12 +28,6 @@ struct renderhdl
 	void release();
 
 	void displayf();
-
-	void open_ldf(char *file);
-	void add_operation(dtype t);
-
-	section *findsection(float x, float y);
-	node *findnode(float x, float y);
 };
 
 #endif

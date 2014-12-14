@@ -2,161 +2,153 @@
 
 void renderhdl::init()
 {
-	sobject = NULL;
-	ssection = NULL;
-	snode = NULL;
-	objectlist.init();
-	sectionlist.init();
-	nodelist.init();
+	fitgraph.init("Data and Fit Graph", 0.0, 0.0, 0.0);
+	errorgraph.init("Error Analysis Graph", 0.0, 2.0, 0.0);
+	fitgraph.scnpos = vec(-0.9, 0.0, 0.0);
+	errorgraph.scnpos = vec(1.45, 0.0, 0.0);
 
-	sectionlist.add(section((char*)"Current Documents", 0, 24, -1, 20, 0, true, false, true, 1.0, vec(0.0, 0.0, 1.0), vec(1.0, 1.0, 1.0)));
-	sectionlist.add(section((char*)"Available Operations", 1, 24, -1, 42, 21, true, false, false, 1.0, vec(0.0, 0.0, 1.0), vec(1.0, 1.0, 1.0)));
+	document.init();
+	document.open_document("test.ldf");
 
-	open_ldf((char*)"test.ldf");
-	open_ldf((char*)"3-23 data.ldf");
-	open_ldf((char*)"6-15 data.ldf");
-	open_ldf((char*)"8-09 data.ldf");
+	const int arrsize = document.container.num_nodes;
+	float datasize = 9.0;
+	double fitdata[arrsize];
 
-	add_operation(luria_d);
-	add_operation(normal_d);
-	add_operation(normal2_d);
-	add_operation(poisson_d);
-	add_operation(binomial_d);
-	add_operation(luria3_d);
+	lnode<int> *curr = document.container.first;
+	for (int x = 0; x < arrsize && curr != NULL; x++)
+	{
+		fitdata[x] = double(curr->data);
+		curr = curr->next;
+	}
+
+	data *d = new data;
+	d->init("Experimental Data", histograph_t, fitdata, 0.0, datasize, 1.0, 0.0, 0.0, 1.0);
+	d->rendcol = vec(1.0, 1.0, 0.0);
+
+	fitgraph.adddata(d);
+
+	distribution distrib;
+	distrib.init();
+	distrib.active_document = &document;
+
+	data *d2 = new data;
+
+	double *ptr = distrib.luria_p(0.0, datasize);
+	for (int x = 0; x < (int)datasize; x++)
+		ptr[x] *= 10.0;
+
+	d2->init("Luria Fit Curve", wireframe_t, ptr, 0.0, datasize, 1.0, 0.0, 0.0, 1.0);
+	d2->interactive = true;
+	d2->rendcol = vec(1.0, 0.0, 0.0);
+	fitgraph.adddata(d2);
+	distrib.clear();
+
+	distrib.init();
+	distrib.active_document = &document;
+
+	data *d3 = new data;
+
+	ptr = distrib.poisson_p(datasize);
+	for (int x = 0; x < (int)datasize; x++)
+		ptr[x] *= 10.0;
+
+	d3->init("Poisson Fit Curve", wireframe_t, ptr, 0.0, datasize, 1.0, 0.0, 0.0, 1.0);
+	d3->rendcol = vec(0.0, 0.0, 1.0);
+	fitgraph.adddata(d3);
+	distrib.clear();
+
+	distrib.init();
+	distrib.active_document = &document;
+
+	data *d4 = new data;
+
+	ptr = distrib.normal_p(datasize);
+	for (int x = 0; x < (int)datasize; x++)
+		ptr[x] *= 10.0;
+
+	d4->init("Normal Fit Curve", wireframe_t, ptr, 0.0, datasize, 1.0, 0.0, 0.0, 1.0);
+	d4->rendcol = vec(0.0, 1.0, 0.0);
+	fitgraph.adddata(d4);
+	distrib.clear();
+
+	distrib.init();
+	distrib.active_document = &document;
+
+	data *d6 = new data;
+	ptr = distrib.distribution_luria(0.0, datasize + 0.1, 0.1, (int)datasize);
+
+	d6->init("Luria Error", surfaceplot_t, ptr, 0.0, datasize, 0.1, 0.0, 0.0, 0.1);
+	d6->rendcol = vec(1.0, 0.0, 0.0);
+	errorgraph.adddata(d6);
+	distrib.clear();
+
+	distrib.init();
+	distrib.active_document = &document;
+
+	data *d7 = new data;
+	ptr = distrib.distribution_poisson(0.0, datasize + 0.1, 0.1, (int)datasize);
+
+	d7->init("Poisson Error", surfaceplot_t, ptr, 0.0, 0.0, 0.1, 0.0, datasize, 0.1);
+	d7->rendcol = vec(0.0, 0.0, 1.0);
+	errorgraph.adddata(d7);
+	distrib.clear();
+
+	distrib.init();
+	distrib.active_document = &document;
+
+	data *d5 = new data;
+	ptr = distrib.distribution_luria3(0.0, datasize + 0.1, 0.1, 0.0, datasize + 0.1, 0.1, (int)datasize);
+
+	d5->init("Luria-Poisson Error", surfaceplot_t, ptr, 0.0, datasize, 0.1, 0.0, datasize, 0.1);
+	d5->rendcol = vec(1.0, 0.0, 1.0);
+	errorgraph.adddata(d5);
+	distrib.clear();
+
+	lnode<data*> *curr1 = fitgraph.datalist.first;
+	double x = 1.0;
+	while (curr1 != NULL)
+	{
+		boxlist.add(checkbox(curr1->data->title, vec(0.0, x++, 0.0), curr1->data->rendcol));
+		curr1->data->show = &boxlist.last->data.status;
+		curr1 = curr1->next;
+	}
+
+	curr1 = errorgraph.datalist.first;
+	lnode<checkbox> *currc = boxlist.first->next;
+	while (curr1 != NULL)
+	{
+		curr1->data->show = &currc->data.status;
+		if (currc->next == NULL)
+			curr1->data->show = &luriapoisson;
+		currc = currc->next;
+		curr1 = curr1->next;
+	}
 }
 
 void renderhdl::release()
 {
-	lnode<object*> *curro = objectlist.first;
-	while (curro != NULL)
-	{
-		curro->data->release();
-		delete curro->data;
-		curro->data = NULL;
-		curro = curro->next;
-	}
-
-	objectlist.clear();
-
-	lnode<section> *currs = sectionlist.first;
-	while (currs != NULL)
-	{
-		currs->data.release();
-		currs = currs->next;
-	}
-
-	sectionlist.clear();
-
-	lnode<node> *currn = nodelist.first;
-	while (currn != NULL)
-	{
-		currn->data.release();
-		currn = currn->next;
-	}
-
-	nodelist.clear();
+	fitgraph.release();
+	errorgraph.release();
 }
 
 void renderhdl::displayf()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
+	glScalef(1.0, 1.0, 1.0);
+	glTranslatef(0.0, 0.0, -4.0);
 
-	lnode<section> *currs = sectionlist.first;
-	while (currs != NULL)
+	fitgraph.render(&display);
+	errorgraph.render(&display);
+
+	luriapoisson = boxlist.first->next->data.status && boxlist.first->next->next->data.status;
+
+	lnode<checkbox> *curr = boxlist.first;
+	while (curr != NULL)
 	{
-		currs->data.render(&display);
-		currs = currs->next;
-	}
-
-	lnode<node> *currn = nodelist.first;
-	while (currn != NULL)
-	{
-		currn->data.render(&display);
-		currn = currn->next;
-	}
-
-	if (sobject != NULL)
-	{
-		float a, b;
-		a = (2.0*double(mouse_x*9)/double(display.scrn_width) - 1.0);
-		b = -(2.0*double((mouse_y-1)*15 + 15)/double(display.scrn_height) - 1.0);
-
-		glColor3f(sobject->color.x, sobject->color.y, sobject->color.z);
-		glRasterPos2f(a - 2.0*double(strlen(sobject->name)*9/2)/double(display.scrn_width), b);
-		for (unsigned int x = 0; x < strlen(sobject->name); x++)
-			glutBitmapCharacter(GLUT_BITMAP_9_BY_15, sobject->name[x]);
+		curr->data.render(&display);
+		curr = curr->next;
 	}
 
 	glutSwapBuffers();
-}
-
-void renderhdl::open_ldf(char *file)
-{
-	lddocument *new_doc = new lddocument;
-	new_doc->init();
-	new_doc->open_document(file);
-
-	object *new_obj = new object;
-	*new_obj = object(new_doc->filename, new_doc, document, vec(0.0, 1.0, 0.0));
-	new_obj->secid = sectionlist.first->data.id;
-
-	objectlist.add(new_obj);
-	sectionlist.first->data.contents.add(new_obj);
-}
-
-void renderhdl::add_operation(dtype t)
-{
-	distribution *new_dist = new distribution;
-	new_dist->init();
-	new_dist->distribution = t;
-
-	char opname[32];
-	if (t == luria_d)
-		strcpy(opname, "Luria Distribution");
-	else if (t == normal_d)
-		strcpy(opname, "Normal Distribution");
-	else if (t == normal2_d)
-		strcpy(opname, "2D Normal Distribution");
-	else if (t == poisson_d)
-		strcpy(opname, "Poisson Distribution");
-	else if (t == binomial_d)
-		strcpy(opname, "Binomial Distribution");
-	else if (t == luria3_d)
-		strcpy(opname, "3D Luria Distribution");
-
-	object *new_obj = new object;
-	*new_obj = object(opname, new_dist, operation, vec(1.0, 1.0, 0.0));
-	new_obj->secid = sectionlist.last->data.id;
-
-	objectlist.add(new_obj);
-	sectionlist.last->data.contents.add(new_obj);
-}
-
-section *renderhdl::findsection(float x, float y)
-{
-	lnode<section> *curr = sectionlist.first;
-	while (curr != NULL)
-	{
-		if (curr->data.in_section(x, y))
-			return &curr->data;
-
-		curr = curr->next;
-	}
-
-	return NULL;
-}
-
-node *renderhdl::findnode(float x, float y)
-{
-	lnode<node> *curr = nodelist.first;
-	while (curr != NULL)
-	{
-		if (curr->data.in_node(x, y))
-			return &curr->data;
-
-		curr = curr->next;
-	}
-
-	return NULL;
 }

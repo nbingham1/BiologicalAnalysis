@@ -46,16 +46,16 @@ struct distribution
 	void clear();
 
 	// p values
-	bool luria_p(double m, int n_sets, double *tblptr);
-	bool poisson_p(int n_sets, double *tblptr);
-	bool normal_p(int n_sets, double *tblptr);
+	double *luria_p(double m, int n_sets);
+	double *poisson_p(int n_sets);
+	double *normal_p(int n_sets);
 
 	// luria distribution
 	bool alloc_luria(int size, double mstart, double mstep);
 	void release_luria();
 
 	void pval_luria(int r);
-	bool distribution_luria(double mstart, double mend, double mstep, int n_sets, double *tblptr);
+	double *distribution_luria(double mstart, double mend, double mstep, int n_sets);
 	void computepoints_luria();
 
 	// 2D normal distribution
@@ -63,17 +63,17 @@ struct distribution
 	void release_normal();
 
 	void pval_normal();
-	bool distribution_normal(double mstart, double mend, double mstep, double sstart, double send, double sstep, int n_sets, double *tblptr);
+	double *distribution_normal(double mstart, double mend, double mstep, double sstart, double send, double sstep, int n_sets);
 	void computepoints_normal();
-	bool distribution_normal2(double mstart, double mend, double mstep, double sigma, int n_sets, double *tblptr);
+	double *distribution_normal2(double mstart, double mend, double mstep, double sigma, int n_sets);
 
 	// 2D poisson distribution
 	void pval_poisson();
-	bool distribution_poisson(double mstart, double mend, double mstep, int n_sets, double *tblptr);
+	double *distribution_poisson(double mstart, double mend, double mstep, int n_sets);
 
 	// 2D binomial distribution
 	void pval_binomial(double prob, int total);
-	bool distribution_binomial(double mstart, double mend, double mstep, double prob, int n_sets, double *tblptr);
+	double *distribution_binomial(double mstart, double mend, double mstep, double prob, int n_sets);
 
 	// 3D luria distribution
 	bool alloc_luria3(int msize, double mstart, double mstep, int ssize, double sstart, double sstep);
@@ -81,7 +81,7 @@ struct distribution
 
 	void pval_poisson3();
 	void pval_luria3();
-	bool distribution_luria3(double mstart, double mend, double mstep, double sstart, double send, double sstep, int n_sets, double *tblptr);
+	double *distribution_luria3(double mstart, double mend, double mstep, double sstart, double send, double sstep, int n_sets);
 	void computepoints_luria3();
 };
 

@@ -17,7 +17,7 @@ void displayhdl::viewport(int w, int h)
 
 void displayhdl::set(int p, int o)
 {
-	glRasterPos2f((2.0*double(p*9)/double(scrn_width) - 1.0), -(2.0*double(o*15 + 15)/double(scrn_height) - 1.0));
+	glRasterPos2f((2.2*double(p*9)/double(scrn_height) - 1.1*double(scrn_width)/double(scrn_height)), -(2.2*double(o*15 + 15)/double(scrn_height) - 1.1));
 	pos = p;
 	off = o;
 }
@@ -49,15 +49,15 @@ void displayhdl::wprint(char *str)
 void displayhdl::box(float r, float l, float t, float b)
 {
 	glBegin(GL_QUADS);
-		glVertex3f((2.0*double(l*9)/double(scrn_width) - 1.0), -(2.0*double((b-1)*15 + 15)/double(scrn_height) - 1.0), 0.5);
-		glVertex3f((2.0*double(l*9)/double(scrn_width) - 1.0), -(2.0*double((t-1)*15 + 15)/double(scrn_height) - 1.0), 0.5);
-		glVertex3f((2.0*double(r*9)/double(scrn_width) - 1.0), -(2.0*double((t-1)*15 + 15)/double(scrn_height) - 1.0), 0.5);
-		glVertex3f((2.0*double(r*9)/double(scrn_width) - 1.0), -(2.0*double((b-1)*15 + 15)/double(scrn_height) - 1.0), 0.5);
+		glVertex3f((2.2*double(l*9)/double(scrn_height) - 1.1*double(scrn_width)/double(scrn_height)), -(2.2*double((b-1)*15 + 15)/double(scrn_height) - 1.1), 0.5);
+		glVertex3f((2.2*double(l*9)/double(scrn_height) - 1.1*double(scrn_width)/double(scrn_height)), -(2.2*double((t-1)*15 + 15)/double(scrn_height) - 1.1), 0.5);
+		glVertex3f((2.2*double(r*9)/double(scrn_height) - 1.1*double(scrn_width)/double(scrn_height)), -(2.2*double((t-1)*15 + 15)/double(scrn_height) - 1.1), 0.5);
+		glVertex3f((2.2*double(r*9)/double(scrn_height) - 1.1*double(scrn_width)/double(scrn_height)), -(2.2*double((b-1)*15 + 15)/double(scrn_height) - 1.1), 0.5);
 	glEnd();
 }
 
 vec displayhdl::tooglc(vec p)
 {
-	return vec((2.0*double(p.x*9)/double(scrn_width) - 1.0),
-			   -(2.0*double((p.y-1)*15 + 15)/double(scrn_height) - 1.0));
+	return vec((2.2*double(p.x*9)/double(scrn_height) - 1.1*double(scrn_width)/double(scrn_height)),
+			   -(2.2*double((p.y-1)*15 + 15)/double(scrn_height) - 1.1));
 }

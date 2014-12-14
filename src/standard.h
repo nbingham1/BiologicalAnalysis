@@ -130,7 +130,6 @@ struct llist
 	void getpos(lnode<A> *pos, A *node)
 	{
 		*node = pos->data;
-		pos = pos->next;
 	}
 };
 

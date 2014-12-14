@@ -22,7 +22,19 @@ float gettime()
 
 void init()
 {
+	glEnable(GL_DEPTH_TEST);
    	glShadeModel(GL_SMOOTH);
+
+   	GLfloat mat_shininess[] = { 100.0 };
+   	GLfloat light_position[] = { 1.0, 0.0, 1.0, 0.0 };
+   	glShadeModel (GL_SMOOTH);
+
+   	glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+   	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+
+  	glEnable(GL_LIGHT0);
+  	glEnable(GL_COLOR_MATERIAL);
+  	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
 
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 
@@ -44,7 +56,7 @@ void reshape(int w, int h)
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(-1.0, 1.0, -1.0, 1.0, 0.0, 999999999);
+	glOrtho(-1.1*(float)w/(float)h, 1.1*(float)w/(float)h, -1.1, 1.1, 2.0, 9999);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }
@@ -55,132 +67,30 @@ void mousefunc(int button, int state, int x, int y)
 	pos = (float)x/9.0;
 	off = (float)y/15.0;
 
+	float upx = 2.2*float(x)/(float)renderer.display.scrn_height - 1.1*(float)renderer.display.scrn_width/(float)renderer.display.scrn_height;
+	float upy = 2.2*float(y)/renderer.display.scrn_height - 1.1;
+
 	renderer.mouse_x = pos;
 	renderer.mouse_y = off;
 	renderer.mouse_b = button;
 
 	if (state == GLUT_DOWN)
 	{
-		if (button == GLUT_LEFT_BUTTON)
+		lnode<checkbox> *curr = renderer.boxlist.first;
+		while (curr != NULL)
 		{
-			float t = gettime();
-			if (t - currtime <= 0.25)
-			{
-				node *n = renderer.findnode(pos, off);
-				if (n != NULL)
-					n->open = !n->open;
-				currtime = -100.0;
-			}
-			else
-			{
-				currtime = t;
-				renderer.ssection = NULL;
-				renderer.snode = NULL;
-				renderer.ssection = renderer.findsection(pos, off);
-				if (renderer.ssection != NULL)
-					renderer.ssection->handledown(pos, off);
+			if (curr->data.in_box(vec(pos, off, 0.0)))
+				break;
+			curr = curr->next;
+		}
 
-				if (renderer.ssection == NULL)
-				{
-					renderer.snode = renderer.findnode(pos, off);
-					if (renderer.snode != NULL)
-						renderer.snode->handleclick(pos, off);
-				}
-			}
-		}
-		else if (button == GLUT_RIGHT_BUTTON)
-		{
-			renderer.snode = renderer.findnode(pos, off);
-		}
+		renderer.fitgraph.handleclick(upx, upy);
+		renderer.errorgraph.handleclick(upx, upy);
 	}
 	else if (state == GLUT_UP)
 	{
-		if (button == GLUT_LEFT_BUTTON)
-		{
-			if (renderer.sobject != NULL)
-			{
-				section *s = renderer.findsection(pos, off);
-
-				if (s == NULL)
-				{
-					if (renderer.ssection->limited_supply)
-					{
-						renderer.nodelist.add(node(renderer.sobject, vec(pos, off, 0.0)));
-						lnode<object*> *curr = renderer.ssection->contents.first;
-						while (curr != NULL && curr->data != renderer.sobject)
-							curr = curr->next;
-
-						renderer.ssection->contents.rem(curr);
-						renderer.sobject = NULL;
-					}
-					else
-					{
-						object *new_obj = renderer.sobject->makecopy();
-
-						renderer.objectlist.add(new_obj);
-						renderer.nodelist.add(node(new_obj, vec(pos, off, 0.0)));
-						renderer.sobject = NULL;
-					}
-				}
-				else
-					renderer.sobject = NULL;
-			}
-
-			if (renderer.ssection != NULL)
-				renderer.ssection->handleup(pos, off);
-			if (renderer.snode != NULL)
-			{
-				renderer.snode->handleclick(pos, off);
-				if (renderer.ssection == NULL)
-					renderer.ssection = renderer.findsection(pos, off);
-
-				if (renderer.ssection != NULL && renderer.ssection->in_section(pos, off))
-				{
-					if (renderer.ssection->id != renderer.snode->contents->secid)
-						renderer.snode->position.x = 26.8;
-					else
-					{
-						if (renderer.ssection->limited_supply)
-						{
-							renderer.ssection->contents.add(renderer.snode->contents);
-							lnode<node> *curr = renderer.nodelist.first;
-							while (curr != NULL && curr->data.contents != renderer.snode->contents)
-								curr = curr->next;
-							renderer.snode->release();
-							renderer.nodelist.rem(curr);
-						}
-						else
-						{
-							lnode<node> *curr = renderer.nodelist.first;
-							while (curr != NULL && curr->data.contents != renderer.snode->contents)
-								curr = curr->next;
-
-							lnode<object*> *curro = renderer.objectlist.first;
-							while (curro != NULL && curro->data != renderer.snode->contents)
-								curro = curro->next;
-
-							curro->data->release();
-							delete curro->data;
-							curro->data = NULL;
-							renderer.objectlist.rem(curro);
-							renderer.snode->release();
-							renderer.nodelist.rem(curr);
-						}
-					}
-				}
-			}
-			renderer.snode = NULL;
-			renderer.ssection = NULL;
-		}
-		else if (button == GLUT_RIGHT_BUTTON)
-		{
-			node *n = renderer.findnode(pos, off);
-			if (renderer.snode != NULL && n != NULL)
-				renderer.snode->connect(n);
-
-			renderer.snode = NULL;
-			n = NULL;
-		}
+		renderer.fitgraph.selected = false;
+		renderer.errorgraph.selected = false;
 	}
 }
 
@@ -190,21 +100,16 @@ void motionfunc(int x, int y)
 	pos = (float)x/9.0;
 	off = (float)y/15.0;
 
+	float upx = 2.2*float(x)/(float)renderer.display.scrn_height - 1.1*(float)renderer.display.scrn_width/(float)renderer.display.scrn_height;
+	float upy = 2.2*float(y)/renderer.display.scrn_height - 1.1;
+
 	renderer.mouse_x = pos;
 	renderer.mouse_y = off;
 
 	if (renderer.mouse_b == GLUT_LEFT_BUTTON)
 	{
-		if (renderer.ssection != NULL && renderer.sobject == NULL)
-			renderer.sobject = renderer.ssection->handledrag(pos, off);
-		else if (renderer.snode != NULL && renderer.sobject == NULL)
-			renderer.snode->handledrag(pos, off);
-		else if (renderer.sobject == NULL)
-		{
-			renderer.snode = renderer.findnode(pos, off);
-			if (renderer.snode != NULL)
-				renderer.snode->handleclick(pos, off);
-		}
+		renderer.fitgraph.handledrag(upx, upy);
+		renderer.errorgraph.handledrag(upx, upy);
 	}
 }
 
@@ -230,7 +135,7 @@ int main(int argc, char **argv)
 
 	atexit(release);
 
-	glutInitWindowSize(1024, 640);
+	glutInitWindowSize(1400, 550);
 	glutInitWindowPosition(0, 0);
 	glutCreateWindow("Luria Delbrueck");
 

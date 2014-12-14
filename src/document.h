@@ -25,13 +25,13 @@ struct lddocument
 	double mselect_left;
 	double mselect_right;
 
-	/*int distribution;
+	int distribution;
 	int error_bars;
 	int current_prob;
-	int update_status;*/
+	int update_status;
 	double mmu;
 	double mml;
-	/*int luria;
+	int luria;
 	int normal;
 	int binomial;
 	int poisson;
@@ -43,7 +43,7 @@ struct lddocument
 	int linear;
 	int left;
 	int right;
-	int current;*/
+	int current;
 
 	char filename[64];
 	char contents[1024];
