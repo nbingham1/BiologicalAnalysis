@@ -1,48 +1,5 @@
 #include "graph.h"
 
-data::data()
-{
-	title[0] = '\0';
-
-	verts = NULL;
-	norms = NULL;
-	indices = NULL;
-
-	basedataptr = NULL;
-	ptrindex = 0;
-
-	x_size = 0;
-	z_size = 0;
-
-	xstart = 0.0;
-	xend = 0.0;
-	xstep = 0.0;
-	ystart = 0.0;
-	yend = 0.0;
-	zstart = 0.0;
-	zend = 0.0;
-	zstep = 0.0;
-
-	ymin = vec();
-	ymax = vec();
-	rendcol = vec();
-
-	show = NULL;
-	interactive = false;
-	remakeb = false;
-	integer = false;
-	snaptomin = false;
-	snaptomax = false;
-
-	gtype = pointcloud_t;
-	dtype = d1D_t;
-}
-
-data::~data()
-{
-	release();
-}
-
 void data::init(char *name, graph_t type, double *heights, double xs, double xe, double xi, double zs, double ze, double zi)
 {
 	strcpy(title, name);
@@ -293,46 +250,20 @@ void data::remake(double *heights)
 void data::release()
 {
 	if (verts != NULL)
+	{
 		delete [] verts;
+		verts = NULL;
+	}
 	if (norms != NULL)
+	{
 		delete [] norms;
+		norms = NULL;
+	}
 	if (indices != NULL)
+	{
 		delete [] indices;
-
-	title[0] = '\0';
-
-	verts = NULL;
-	norms = NULL;
-	indices = NULL;
-
-	basedataptr = NULL;
-	ptrindex = 0;
-
-	x_size = 0;
-	z_size = 0;
-
-	xstart = 0.0;
-	xend = 0.0;
-	xstep = 0.0;
-	ystart = 0.0;
-	yend = 0.0;
-	zstart = 0.0;
-	zend = 0.0;
-	zstep = 0.0;
-
-	ymin = vec();
-	ymax = vec();
-	rendcol = vec();
-
-	show = NULL;
-	interactive = false;
-	remakeb = false;
-	integer = false;
-	snaptomin = false;
-	snaptomax = false;
-
-	gtype = pointcloud_t;
-	dtype = d1D_t;
+		indices = NULL;
+	}
 }
 
 double data::getvalue(double x, double z)
@@ -435,38 +366,6 @@ void data::render()
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
-tracer::tracer()
-{
-	position = vec();
-	bscale = vec();
-
-	xcon = NULL;
-	ycon = NULL;
-	zcon = NULL;
-
-	xsel = false;
-	zsel = false;
-	show = NULL;
-
-	dataptr = NULL;
-}
-
-tracer::~tracer()
-{
-	position = vec();
-	bscale = vec();
-
-	xcon = NULL;
-	ycon = NULL;
-	zcon = NULL;
-
-	xsel = false;
-	zsel = false;
-	show = NULL;
-
-	dataptr = NULL;
-}
-
 void tracer::init(data *d, double *x, double *y, double *z, bool *s)
 {
 	dataptr = d;
@@ -482,8 +381,6 @@ void tracer::init(data *d, double *x, double *y, double *z, bool *s)
 
 void tracer::render()
 {
-	/*double yoff = 0.0;
-
 	if (xcon != NULL)
 		position.x = *xcon;
 	if (ycon != NULL)
@@ -506,51 +403,52 @@ void tracer::render()
 			position.y = dataptr->getvalue(position.x, 0.0);
 			position.z = 0.0;
 		}
-
-		if (dataptr->dtype == d3D_t)
-			yoff = 0.001;
-
-		glBegin(GL_LINES);
-		glVertex3f(position.x, yoff, 0.0);
-		glVertex3f(position.x, yoff, dataptr->zend);
-
-		glVertex3f(position.x, yoff, position.z);
-		glVertex3f(position.x, dataptr->yend, position.z);
-
-		glVertex3f(0.0, yoff, position.z);
-		glVertex3f(dataptr->xend, yoff, position.z);
-		glEnd();
-
-		glPushMatrix();
-		glTranslatef(position.x, yoff, 0.0);
-		glScalef(bscale.x, bscale.y, bscale.z);
-		glutSolidSphere(0.1, 4, 4);
-		glPopMatrix();
-
-		glPushMatrix();
-		glTranslatef(0.0, yoff, position.z);
-		glScalef(bscale.x, bscale.y, bscale.z);
-		glutSolidSphere(0.1, 4, 4);
-		glPopMatrix();
-
-		glPushMatrix();
-		glTranslatef(position.x, yoff, dataptr->zend);
-		glScalef(bscale.x, bscale.y, bscale.z);
-		glutSolidSphere(0.1, 4, 4);
-		glPopMatrix();
-
-		glPushMatrix();
-		glTranslatef(dataptr->xend, yoff, position.z);
-		glScalef(bscale.x, bscale.y, bscale.z);
-		glutSolidSphere(0.1, 4, 4);
-		glPopMatrix();
-
-		glPushMatrix();
-		glTranslatef(position.x, position.y, position.z);
-		glScalef(bscale.x, bscale.y, bscale.z);
-		glutSolidSphere(0.1, 4, 4);
-		glPopMatrix();
 	}
+
+	double yoff = 0.0;
+	if (dataptr->dtype == d3D_t)
+		yoff = 0.001;
+
+	glBegin(GL_LINES);
+	glVertex3f(position.x, yoff, 0.0);
+	glVertex3f(position.x, yoff, dataptr->zend);
+
+	glVertex3f(position.x, yoff, position.z);
+	glVertex3f(position.x, dataptr->yend, position.z);
+
+	glVertex3f(0.0, yoff, position.z);
+	glVertex3f(dataptr->xend, yoff, position.z);
+	glEnd();
+
+	glPushMatrix();
+	glTranslatef(position.x, yoff, 0.0);
+	glScalef(bscale.x, bscale.y, bscale.z);
+	glutSolidSphere(0.1, 4, 4);
+	glPopMatrix();
+
+	glPushMatrix();
+	glTranslatef(0.0, yoff, position.z);
+	glScalef(bscale.x, bscale.y, bscale.z);
+	glutSolidSphere(0.1, 4, 4);
+	glPopMatrix();
+
+	glPushMatrix();
+	glTranslatef(position.x, yoff, dataptr->zend);
+	glScalef(bscale.x, bscale.y, bscale.z);
+	glutSolidSphere(0.1, 4, 4);
+	glPopMatrix();
+
+	glPushMatrix();
+	glTranslatef(dataptr->xend, yoff, position.z);
+	glScalef(bscale.x, bscale.y, bscale.z);
+	glutSolidSphere(0.1, 4, 4);
+	glPopMatrix();
+
+	glPushMatrix();
+	glTranslatef(position.x, position.y, position.z);
+	glScalef(bscale.x, bscale.y, bscale.z);
+	glutSolidSphere(0.1, 4, 4);
+	glPopMatrix();
 
 	char num[32];
 	int l;
@@ -562,7 +460,7 @@ void tracer::render()
 			sprintf(num, "%f", position.z);
 			l = strlen(num);
 			glRasterPos3f(position.x, yoff*5.0, dataptr->zend + 0.1);
-			for (unsigned int x = 0; x < strlen(num) && x < 32; x++)
+			for (unsigned int x = 0; x < strlen(num); x++)
 				glutBitmapCharacter(GLUT_BITMAP_9_BY_15, num[x]);
 		}
 		else
@@ -570,7 +468,7 @@ void tracer::render()
 			sprintf(num, "%f", position.x);
 			l = strlen(num);
 			glRasterPos3f(dataptr->xend + 0.1, yoff*5.0, position.z);
-			for (unsigned int x = 0; x < strlen(num) && x < 32; x++)
+			for (unsigned int x = 0; x < strlen(num); x++)
 				glutBitmapCharacter(GLUT_BITMAP_9_BY_15, num[x]);
 		}
 	}
@@ -579,86 +477,24 @@ void tracer::render()
 		sprintf(num, "%f", position.x);
 		l = strlen(num);
 		glRasterPos3f(position.x, yoff*5.0, dataptr->zend + 0.1);
-		for (unsigned int x = 0; x < strlen(num) && x < 32; x++)
+		for (unsigned int x = 0; x < strlen(num); x++)
 			glutBitmapCharacter(GLUT_BITMAP_9_BY_15, num[x]);
 
 		sprintf(num, "%f", position.z);
 		l = strlen(num);
 		glRasterPos3f(dataptr->xend + 0.1, yoff*5.0, position.z);
-		for (unsigned int x = 0; x < strlen(num) && x < 32; x++)
+		for (unsigned int x = 0; x < strlen(num); x++)
 			glutBitmapCharacter(GLUT_BITMAP_9_BY_15, num[x]);
 	}
 
 	sprintf(num, "%f", position.y);
 	l = strlen(num);
 	glRasterPos3f(position.x, dataptr->yend, position.z);
-	for (unsigned int x = 0; x < strlen(num) && x < 32; x++)
-		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, num[x]);*/
+	for (unsigned int x = 0; x < strlen(num); x++)
+		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, num[x]);
 }
 
-graph::graph()
-{
-	datalist.init();
-	tracerlist.init();
-	x_size = 0.0f;
-	y_size = 0.0f;
-	z_size = 0.0f;
-
-	x_angle = 0.0f;
-	y_angle = 0.0f;
-
-	mouse_x = 0.0f;
-	mouse_y = 0.0f;
-
-	title[0] = '\0';
-
-	xlabel[0] = '\0';
-	ylabel[0] = '\0';
-	zlabel[0] = '\0';
-
-	dimension = 0;
-
-	scnpos = vec();
-
-	grid = false;
-	selected = false;
-
-	disp = NULL;
-}
-
-graph::~graph()
-{
-	release();
-
-	datalist.init();
-	tracerlist.init();
-	x_size = 0.0f;
-	y_size = 0.0f;
-	z_size = 0.0f;
-
-	x_angle = 0.0f;
-	y_angle = 0.0f;
-
-	mouse_x = 0.0f;
-	mouse_y = 0.0f;
-
-	title[0] = '\0';
-
-	xlabel[0] = '\0';
-	ylabel[0] = '\0';
-	zlabel[0] = '\0';
-
-	dimension = 0;
-
-	scnpos = vec();
-
-	grid = false;
-	selected = false;
-
-	disp = NULL;
-}
-
-void graph::init(const char *name, displayhdl *display, float sx, float sy, float sz)
+void graph::init(char *name, displayhdl *display, float sx, float sy, float sz)
 {
 	disp = display;
 
@@ -674,9 +510,9 @@ void graph::init(const char *name, displayhdl *display, float sx, float sy, floa
 
 	strcpy(title, name);
 
-	strcpy(xlabel, "x");
-	strcpy(ylabel, "y");
-	strcpy(zlabel, "z");
+	strcpy(xlabel, "x\0");
+	strcpy(ylabel, "y\0");
+	strcpy(zlabel, "z\0");
 
 	x_angle = 30.0;
 	y_angle = -45.0;
@@ -684,7 +520,23 @@ void graph::init(const char *name, displayhdl *display, float sx, float sy, floa
 
 void graph::release()
 {
+	lnode<data*> *curr = datalist.first;
+	while (curr != NULL)
+	{
+		curr->data->release();
+		delete curr->data;
+		curr = curr->next;
+	}
+
 	datalist.clear();
+
+	lnode<tracer*> *tcurr = tracerlist.first;
+	while (tcurr != NULL)
+	{
+		delete tcurr->data;
+		tcurr = tcurr->next;
+	}
+
 	tracerlist.clear();
 
 	dimension = 0;
@@ -752,35 +604,33 @@ void graph::render()
 
 	while (curr != NULL)
 	{
-		if (curr->data != NULL)
+		if ((curr->data->show == NULL || *curr->data->show) && curr->data->dtype == d3D_t)
+			dimension = 3;
+		else if ((curr->data->show == NULL || *curr->data->show) && dimension <= 2)
 		{
-			if ((curr->data->show == NULL || *curr->data->show) && curr->data->dtype == d3D_t)
-				dimension = 3;
-			else if ((curr->data->show == NULL || *curr->data->show) && dimension <= 2)
-			{
-				dimension = 2;
+			dimension = 2;
 
-				if (curr->data->xend - curr->data->xstart == curr->data->xstep)
-					xa = true;
-			}
-
-			if (curr->data->show == NULL || *curr->data->show)
-			{
-				if (curr->data->xend > x_size)
-					x_size = curr->data->xend;
-
-				if (curr->data->yend > y_size)
-					y_size = curr->data->yend;
-
-				if (curr->data->zend > z_size)
-					z_size = curr->data->zend;
-
-				if (curr->data->xend - curr->data->xstart > curr->data->xstep)
-					rendx = true;
-				if (curr->data->zend - curr->data->zstart > curr->data->zstep)
-					rendz = true;
-			}
+			if (curr->data->xend - curr->data->xstart == curr->data->xstep)
+				xa = true;
 		}
+
+		if (curr->data->show == NULL || *curr->data->show)
+		{
+			if (curr->data->xend > x_size)
+				x_size = curr->data->xend;
+
+			if (curr->data->yend > y_size)
+				y_size = curr->data->yend;
+
+			if (curr->data->zend > z_size)
+				z_size = curr->data->zend;
+
+			if (curr->data->xend - curr->data->xstart > curr->data->xstep)
+				rendx = true;
+			if (curr->data->zend - curr->data->zstart > curr->data->zstep)
+				rendz = true;
+		}
+
 		curr = curr->next;
 	}
 
@@ -794,7 +644,7 @@ void graph::render()
 
 	glTranslatef(scnpos.x, scnpos.y, scnpos.z);
 	glRasterPos3f(-0.4, 1.05, 0.0);
-	for (unsigned int x = 0; x < strlen(title) && x < 32; x++)
+	for (unsigned int x = 0; x < strlen(title); x++)
 		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, title[x]);
 
 	glPopMatrix();
@@ -913,66 +763,61 @@ void graph::render()
 	{
 		sprintf(num, "%d", int(x_size));
 		l = strlen(num) + 4;
-		printf("%d\n", l);
 		sprintf(num, "%f", x_size);
 		num[l] = '\0';
 		glRasterPos3f(2.00, -0.06, -0.06);
-		for (unsigned int x = 0; x < strlen(num) && x < 32; x++)
+		for (unsigned int x = 0; x < strlen(num); x++)
 			glutBitmapCharacter(GLUT_BITMAP_9_BY_15, num[x]);
 
 		glRasterPos3f(1.9, -0.06, -0.06);
-		for (unsigned int x = 0; x < strlen(xlabel) && x < 16; x++)
+		for (unsigned int x = 0; x < strlen(xlabel); x++)
 			glutBitmapCharacter(GLUT_BITMAP_9_BY_15, xlabel[x]);
 	}
 	else
 	{
 		sprintf(num, "%d", 0);
 		l = strlen(num) + 4;
-		printf("%d\n", l);
 		sprintf(num, "%f", 0.0);
 		num[l] = '\0';
 		glRasterPos3f(2.06, -0.06, -0.06);
-		for (unsigned int x = 0; x < strlen(num) && x < 32; x++)
+		for (unsigned int x = 0; x < strlen(num); x++)
 			glutBitmapCharacter(GLUT_BITMAP_9_BY_15, num[x]);
 	}
 
 	sprintf(num, "%d", int(y_size));
 	l = strlen(num) + 4;
-	printf("%d\n", l);
 	sprintf(num, "%f", y_size);
 	num[l] = '\0';
 	glRasterPos3f(-0.06, 2.06, -0.06);
-	for (unsigned int x = 0; x < strlen(num) && x < 32; x++)
+	for (unsigned int x = 0; x < strlen(num); x++)
 		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, num[x]);
 
 	glRasterPos3f(0.0, 2.01, 0.0);
-	for (unsigned int x = 0; x < strlen(ylabel) && x < 16; x++)
+	for (unsigned int x = 0; x < strlen(ylabel); x++)
 		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, ylabel[x]);
 
 	if (rendz)
 	{
 		sprintf(num, "%d", int(z_size));
 		l = strlen(num) + 4;
-		printf("%d\n", l);
 		sprintf(num, "%f", z_size);
 		num[l] = '\0';
 		glRasterPos3f(-0.06, -0.06, 2.00);
-		for (unsigned int x = 0; x < strlen(num) && x < 32; x++)
+		for (unsigned int x = 0; x < strlen(num); x++)
 			glutBitmapCharacter(GLUT_BITMAP_9_BY_15, num[x]);
 
 		glRasterPos3f(-0.06, -0.06, 1.9);
-		for (unsigned int x = 0; x < strlen(zlabel) && x < 16; x++)
+		for (unsigned int x = 0; x < strlen(zlabel); x++)
 			glutBitmapCharacter(GLUT_BITMAP_9_BY_15, zlabel[x]);
 	}
 	else
 	{
 		sprintf(num, "%d", 0);
 		l = strlen(num) + 4;
-		printf("%d\n", l);
 		sprintf(num, "%f", 0.0);
 		num[l] = '\0';
 		glRasterPos3f(-0.06, -0.06, 2.06);
-		for (unsigned int x = 0; x < strlen(num) && x < 32; x++)
+		for (unsigned int x = 0; x < strlen(num); x++)
 			glutBitmapCharacter(GLUT_BITMAP_9_BY_15, num[x]);
 	}
 
@@ -985,12 +830,10 @@ void graph::render()
 	lnode<tracer*> *tcurr = tracerlist.first;
 	while (tcurr != NULL)
 	{
-		if(tcurr->data != NULL)
-		{
-			tcurr->data->bscale = vec(x_size/10.0, y_size/10.0, z_size/10.0);
-			if ((tcurr->data->show == NULL || *tcurr->data->show) && tcurr->data != NULL && tcurr->data->dataptr != NULL && (tcurr->data->dataptr->show == NULL || *tcurr->data->dataptr->show))
-				tcurr->data->render();
-		}
+		tcurr->data->bscale = vec(x_size/10.0, y_size/10.0, z_size/10.0);
+		if ((tcurr->data->show == NULL || *tcurr->data->show) && tcurr->data != NULL && tcurr->data->dataptr != NULL && (tcurr->data->dataptr->show == NULL || *tcurr->data->dataptr->show))
+			tcurr->data->render();
+
 		tcurr = tcurr->next;
 	}
 

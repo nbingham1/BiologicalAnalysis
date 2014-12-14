@@ -1,17 +1,6 @@
 #include "document.h"
 #include "distribution.h"
 
-lddocument::lddocument()
-{
-	init();
-}
-
-lddocument::~lddocument()
-{
-	release();
-	init();
-}
-
 void lddocument::init()
 {
 	// calculation
@@ -32,6 +21,29 @@ void lddocument::init()
 
 	mmu = 0.0;
 	mml = 0.0;
+
+	// flags
+	/*distribution = LURIA;
+	error_bars = 0;
+	current_prob = 1;
+	update_status = 1;
+	luria = 1;
+	normal = 0;
+	poisson = 0;
+	binomial = 0;
+	grid = 0;
+	draw_select = 0;
+	update_select = 0;
+	draw_poisson = 0;
+	draw_normal = 0;
+	mselect = 0.0f;
+	mselect_max = 0.0f;
+	mselect_left = 0.0f;
+	mselect_right = 0.0f;
+	linear = 1;
+	left = 0;
+	right = 0;
+	current = 0;*/
 
 	for (int x = 0; x < 150; x++)
 	{
@@ -206,7 +218,7 @@ void lddocument::remakedataset()
 	analyze.clear();
 }
 
-void lddocument::open_document(const char *fname)
+void lddocument::open_document(char *fname)
 {
 	FILE *lpfile;
 	int colnum, setheight;
@@ -289,8 +301,8 @@ void lddocument::open_document(const char *fname)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	if (countsdata != NULL)
 		countsdata->release();
-
-	countsdata = new data();
+	else
+		countsdata = new data;
 
 	countsdata->init((char*)"Experimental Data", histograph_t, counts, 0.0, float(num_sets), 1.0, 0.0, 0.0, 1.0);
 	countsdata->rendcol = vec(1.0, 1.0, 0.0);
@@ -299,8 +311,8 @@ void lddocument::open_document(const char *fname)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	if (luria != NULL)
 		luria->release();
-
-	luria = new data();
+	else
+		luria = new data;
 
 	ptr = analyze.luria_p(mml, num_sets);
 
@@ -313,8 +325,8 @@ void lddocument::open_document(const char *fname)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	if (poisson != NULL)
 		poisson->release();
-
-	poisson = new data();
+	else
+		poisson = new data;
 
 	ptr = analyze.poisson_p(mmu, num_sets);
 
@@ -327,8 +339,8 @@ void lddocument::open_document(const char *fname)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	if (normal != NULL)
 		normal->release();
-
-	normal = new data();
+	else
+		normal = new data;
 
 	ptr = analyze.normal_p(num_sets);
 
@@ -341,8 +353,8 @@ void lddocument::open_document(const char *fname)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	if (luriae != NULL)
 		luriae->release();
-
-	luriae = new data();
+	else
+		luriae = new data;
 
 	ptr = analyze.distribution_luria(0.0, 10.125, 0.125, num_sets);
 
@@ -356,8 +368,8 @@ void lddocument::open_document(const char *fname)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	if (normal2e != NULL)
 		normal2e->release();
-
-	normal2e = new data();
+	else
+		normal2e = new data;
 
 	ptr = analyze.distribution_normal(0.0, 10.25, 0.25, 0.0, 10.25, 0.25, num_sets);
 
@@ -372,8 +384,8 @@ void lddocument::open_document(const char *fname)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	if (normale != NULL)
 		normale->release();
-
-	normale = new data();
+	else
+		normale = new data;
 
 	ptr = analyze.distribution_normal2(0.0, 10.25, 0.25, mml, num_sets);
 
@@ -386,8 +398,8 @@ void lddocument::open_document(const char *fname)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	if (poissone != NULL)
 		poissone->release();
-
-	poissone = new data();
+	else
+		poissone = new data;
 
 	ptr = analyze.distribution_poisson(0.0, 10.125, 0.125, num_sets);
 
@@ -402,8 +414,8 @@ void lddocument::open_document(const char *fname)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /*	if (binomiale != NULL)
 		binomiale->release();
-
-	binomiale = new data();
+	else
+		binomiale = new data;
 
 	ptr = analyze.distribution_binomial(0.0, 1.01, 0.01, 0.5, num_sets);
 
@@ -417,8 +429,8 @@ void lddocument::open_document(const char *fname)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	if (luria3e != NULL)
 		luria3e->release();
-
-	luria3e = new data();
+	else
+		luria3e = new data;
 
 	ptr = analyze.distribution_luria3(0.0, 10.25, 0.25, 0.0, 10.25, 0.25, num_sets);
 
@@ -430,6 +442,6 @@ void lddocument::open_document(const char *fname)
 	analyze.clear();
 }
 
-void lddocument::save_document(const char *fname)
+void lddocument::save_document(char *fname)
 {
 }

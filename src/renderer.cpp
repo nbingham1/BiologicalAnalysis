@@ -30,7 +30,7 @@ void renderhdl::init()
 		boxlist.add(checkbox(curr1->data->title, vec(0.0, x++, 0.0), curr1->data->rendcol));
 		curr1->data->show = &boxlist.last->data.status;
 		boxlist.add(checkbox("Trace", vec(0.0, x++, 0.0), curr1->data->rendcol));
-		tracer *t = new tracer();
+		tracer *t = new tracer;
 		t->init(curr1->data, NULL, NULL, NULL, &boxlist.last->data.status);
 		fitgraph.addtracer(t);
 
@@ -46,7 +46,7 @@ void renderhdl::init()
 		curr1->data->show = &boxlist.last->data.status;
 
 		boxlist.add(checkbox("Trace", vec(0.0, x++, 0.0), curr1->data->rendcol));
-		tracer *t = new tracer();
+		tracer *t = new tracer;
 		if (curr1->data == document.luria3e)
 		{
 			t->init(document.luria3e, &document.mmu, NULL, &document.mml, &boxlist.last->data.status);

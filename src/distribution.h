@@ -19,9 +19,6 @@ enum dtype
 
 struct distribution
 {
-	distribution();
-	~distribution();
-
 	double *m_table;
 	double *s_table;
 	double *p_table;
@@ -41,7 +38,7 @@ struct distribution
 	bool   grid;
 	bool   graph;
 
-	dtype distribution_type;
+	dtype distribution;
 
 	lddocument *active_document;
 

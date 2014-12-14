@@ -25,8 +25,6 @@ enum dimension_t
 
 struct data
 {
-	data();
-	~data();
 	char title[32];
 
 	double *verts;
@@ -74,9 +72,6 @@ struct data
 
 struct tracer
 {
-	tracer();
-	~tracer();
-
 	vec position;
 	vec bscale;
 
@@ -95,8 +90,6 @@ struct tracer
 
 struct graph
 {
-	graph();
-	~graph();
 	llist<data*> datalist;
 	llist<tracer*> tracerlist;
 	float x_size;
@@ -128,7 +121,7 @@ struct graph
 
 	displayhdl *disp;
 
-	void init(const char *name, displayhdl *display, float sx, float sy, float sz);
+	void init(char *name, displayhdl *display, float sx, float sy, float sz);
 	void release();
 
 	void adddata(data *dataptr);

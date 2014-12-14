@@ -1,36 +1,5 @@
 #include "distribution.h"
 
-distribution::distribution()
-{
-	m_table = NULL;
-	s_table = NULL;
-	p_table = NULL;
-	ps_table = NULL;
-	pf_table = NULL;
-	h_table = NULL;
-	points = NULL;
-	max = 0.0;
-	left = 0.0;
-	right = 0.0;
-	max_sigma = 0.0;
-	num_sets = 0;
-	num_points = 0;
-	num_sigma = 0;
-
-	error_bars = false;
-	grid = false;
-	graph = false;
-
-	distribution_type = luria_d;
-
-	active_document = NULL;
-}
-
-distribution::~distribution()
-{
-	clear();
-}
-
 void distribution::init()
 {
 	m_table = NULL;

@@ -13,9 +13,6 @@
 
 struct lddocument
 {
-	lddocument();
-	~lddocument();
-
 	double range_start;
 	double range_end;
 	double step_size;
@@ -31,6 +28,24 @@ struct lddocument
 
 	double mmu;
 	double mml;
+
+	/*int distribution;
+	int error_bars;
+	int current_prob;
+	int update_status;
+	int luria;
+	int normal;
+	int binomial;
+	int poisson;
+	int grid;
+	int draw_select;
+	int update_select;
+	int draw_poisson;
+	int draw_normal;
+	int linear;
+	int left;
+	int right;
+	int current;*/
 
 	char filename[64];
 	char contents[1024];
@@ -57,8 +72,8 @@ struct lddocument
 	void release();
 
 	void remakedataset();
-	void open_document(const char *fname);
-	void save_document(const char *fname);
+	void open_document(char *fname);
+	void save_document(char *fname);
 };
 
 #endif
